@@ -2,19 +2,27 @@ let nodes, edges, network, graph = {};
 
 function buildGraph() {
   let n = parseInt(document.getElementById("nodes").value);
-  let edgeInput = document.getElementById("edges").value.trim().split("\n");
+  let edgeLines = document.getElementById("edges").value.trim().split("\n");
 
   nodes = new vis.DataSet();
   edges = new vis.DataSet();
   graph = {};
 
+  // Create nodes
   for (let i = 0; i < n; i++) {
-    nodes.add({ id: i, label: i.toString() });
+    nodes.add({ id: i, label: i.toString(), color: "#1e293b" });
     graph[i] = [];
   }
 
-  edgeInput.forEach(line => {
-    let [u, v, w] = line.split(" ").map(Number);
+  // Create edges
+  edgeLines.forEach(line => {
+    let parts = line.trim().split(" ").map(Number);
+
+    if (parts.length < 2) return;
+
+    let u = parts[0];
+    let v = parts[1];
+    let w = parts[2] || 1; // default weight
 
     edges.add({
       from: u,
@@ -23,7 +31,7 @@ function buildGraph() {
     });
 
     graph[u].push([v, w]);
-    graph[v].push([u, w]); // undirected
+    graph[v].push([u, w]);
   });
 
   let container = document.getElementById("network");
@@ -46,19 +54,29 @@ function resetGraph() {
 
 // BFS
 async function runBFS() {
+  if (!graph[0]) {
+    alert("Build graph first!");
+    return;
+  }
+
+  resetGraph();
+
   let visited = new Set();
-  let q = [0];
+  let queue = [0];
 
-  while (q.length > 0) {
-    let node = q.shift();
+  while (queue.length > 0) {
+    let node = queue.shift();
+
     if (visited.has(node)) continue;
-
     visited.add(node);
-    highlightNode(node, "orange");
-    await sleep(700);
 
-    for (let nbr of graph[node]) {
-      if (!visited.has(nbr)) q.push(nbr);
+    highlightNode(node, "orange");
+    await sleep(600);
+
+    for (let [nbr, w] of graph[node]) {
+      if (!visited.has(nbr)) {
+        queue.push(nbr);
+      }
     }
 
     highlightNode(node, "green");
@@ -67,14 +85,22 @@ async function runBFS() {
 
 // DFS
 async function runDFS() {
+  if (!graph[0]) {
+    alert("Build graph first!");
+    return;
+  }
+
+  resetGraph();
+
   let visited = new Set();
 
   async function dfs(node) {
     visited.add(node);
-    highlightNode(node, "orange");
-    await sleep(700);
 
-    for (let nbr of graph[node]) {
+    highlightNode(node, "orange");
+    await sleep(600);
+
+    for (let [nbr, w] of graph[node]) {
       if (!visited.has(nbr)) {
         await dfs(nbr);
       }
@@ -85,11 +111,17 @@ async function runDFS() {
 
   await dfs(0);
 }
+
+// Dijkstra
 async function runDijkstra() {
+  if (!graph[0]) {
+    alert("Build graph first!");
+    return;
+  }
+
   resetGraph();
 
-  let start = parseInt(document.getElementById("startNode").value);
-
+  let start = 0;
   let dist = {};
   let visited = new Set();
 
@@ -99,7 +131,6 @@ async function runDijkstra() {
   while (true) {
     let u = -1;
 
-    // find min distance node
     for (let node in dist) {
       if (!visited.has(node) && (u === -1 || dist[node] < dist[u])) {
         u = node;
@@ -111,7 +142,7 @@ async function runDijkstra() {
     visited.add(u);
 
     highlightNode(parseInt(u), "orange");
-    await sleep(800);
+    await sleep(700);
 
     for (let [v, w] of graph[u]) {
       if (dist[u] + w < dist[v]) {
@@ -122,5 +153,5 @@ async function runDijkstra() {
     highlightNode(parseInt(u), "green");
   }
 
-  console.log("Final distances:", dist);
+  console.log("Distances:", dist);
 }
