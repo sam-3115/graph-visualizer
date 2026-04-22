@@ -1,48 +1,31 @@
-// Nodes & Edges
-let nodes = new vis.DataSet([
-  { id: 0, label: "0" },
-  { id: 1, label: "1" },
-  { id: 2, label: "2" },
-  { id: 3, label: "3" },
-  { id: 4, label: "4" }
-]);
+let nodes, edges, network, graph = {};
 
-let edges = new vis.DataSet([
-  { from: 0, to: 1 },
-  { from: 0, to: 2 },
-  { from: 1, to: 3 },
-  { from: 2, to: 4 }
-]);
+function buildGraph() {
+  let n = parseInt(document.getElementById("nodes").value);
+  let edgeInput = document.getElementById("edges").value.trim().split("\n");
 
-let container = document.getElementById("network");
-let data = { nodes: nodes, edges: edges };
+  nodes = new vis.DataSet();
+  edges = new vis.DataSet();
+  graph = {};
 
-let options = {
-  nodes: {
-    shape: "dot",
-    size: 20,
-    font: { color: "white" }
-  },
-  edges: {
-    color: "#94a3b8"
-  },
-  physics: {
-    enabled: true
+  // Create nodes
+  for (let i = 0; i < n; i++) {
+    nodes.add({ id: i, label: i.toString() });
+    graph[i] = [];
   }
-};
 
-let network = new vis.Network(container, data, options);
+  // Create edges
+  edgeInput.forEach(line => {
+    let [u, v] = line.split(" ").map(Number);
+    edges.add({ from: u, to: v });
+    graph[u].push(v);
+    graph[v].push(u); // undirected
+  });
 
-// Graph structure
-let graph = {
-  0: [1, 2],
-  1: [3],
-  2: [4],
-  3: [],
-  4: []
-};
+  let container = document.getElementById("network");
+  network = new vis.Network(container, { nodes, edges }, {});
+}
 
-// Utility
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -59,23 +42,19 @@ function resetGraph() {
 
 // BFS
 async function runBFS() {
-  resetGraph();
   let visited = new Set();
-  let queue = [0];
+  let q = [0];
 
-  while (queue.length > 0) {
-    let node = queue.shift();
-
+  while (q.length > 0) {
+    let node = q.shift();
     if (visited.has(node)) continue;
-    visited.add(node);
 
+    visited.add(node);
     highlightNode(node, "orange");
-    await sleep(800);
+    await sleep(700);
 
     for (let nbr of graph[node]) {
-      if (!visited.has(nbr)) {
-        queue.push(nbr);
-      }
+      if (!visited.has(nbr)) q.push(nbr);
     }
 
     highlightNode(node, "green");
@@ -84,13 +63,12 @@ async function runBFS() {
 
 // DFS
 async function runDFS() {
-  resetGraph();
   let visited = new Set();
 
   async function dfs(node) {
     visited.add(node);
     highlightNode(node, "orange");
-    await sleep(800);
+    await sleep(700);
 
     for (let nbr of graph[node]) {
       if (!visited.has(nbr)) {
