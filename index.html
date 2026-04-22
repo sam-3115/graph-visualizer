@@ -9,9 +9,22 @@
 
 <h1>Graph Visualizer</h1>
 
+<div class="input-box">
+  <label>Nodes:</label>
+  <input type="number" id="nodes" value="5">
+
+  <label>Edges (u v per line):</label><br>
+  <textarea id="edges">0 1
+0 2
+1 3
+2 4</textarea><br>
+
+  <button onclick="buildGraph()">Build Graph</button>
+</div>
+
 <div id="controls">
-  <button onclick="runBFS()">Run BFS</button>
-  <button onclick="runDFS()">Run DFS</button>
+  <button onclick="runBFS()">BFS</button>
+  <button onclick="runDFS()">DFS</button>
   <button onclick="resetGraph()">Reset</button>
 </div>
 
