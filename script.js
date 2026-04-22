@@ -62,7 +62,9 @@ async function runBFS() {
   resetGraph();
 
   let visited = new Set();
-  let queue = [0];
+  // let queue = [0];
+  let start = parseInt(document.getElementById("startNode").value);
+  let queue = [start];
 
   while (queue.length > 0) {
     let node = queue.shift();
@@ -108,8 +110,9 @@ async function runDFS() {
 
     highlightNode(node, "green");
   }
-
-  await dfs(0);
+  let start = parseInt(document.getElementById("startNode").value);
+  await dfs(start);
+  // await dfs(0);
 }
 
 // Dijkstra
@@ -121,7 +124,8 @@ async function runDijkstra() {
 
   resetGraph();
 
-  let start = 0;
+  // let start = 0;
+  let start = parseInt(document.getElementById("startNode").value);
   let dist = {};
   let visited = new Set();
 
