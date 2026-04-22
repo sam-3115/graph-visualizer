@@ -11,9 +11,10 @@ public:
         adj.resize(V);
     }
 
-    void addEdge(int u, int v, int w = 1) {
+    void addEdge(int u, int v, int w, bool undirected) {
         adj[u].push_back({v, w});
-        adj[v].push_back({u, w});
+        if (undirected)
+            adj[v].push_back({u, w});
     }
 
     // BFS
@@ -26,8 +27,7 @@ public:
         visited[start] = true;
 
         while (!q.empty()) {
-            int node = q.front();
-            q.pop();
+            int node = q.front(); q.pop();
             result.push_back(node);
 
             for (auto &nbr : adj[node]) {
@@ -68,8 +68,7 @@ public:
         pq.push({0, start});
 
         while (!pq.empty()) {
-            auto [d, node] = pq.top();
-            pq.pop();
+            auto [d, node] = pq.top(); pq.pop();
 
             for (auto &nbr : adj[node]) {
                 int next = nbr.first;
@@ -86,22 +85,44 @@ public:
 };
 
 int main() {
-    Graph g(5);
+    int V, E;
+    cout << "Enter number of nodes and edges: ";
+    cin >> V >> E;
 
-    g.addEdge(0,1,4);
-    g.addEdge(0,2,2);
-    g.addEdge(1,3,5);
-    g.addEdge(2,4,3);
+    Graph g(V);
 
-    vector<int> bfsRes = g.bfs(0);
-    cout << "BFS: ";
+    cout << "Enter edges (u v weight):\n";
+    for (int i = 0; i < E; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        g.addEdge(u, v, w, true); // change to false if directed
+    }
+
+    int start;
+    cout << "Enter starting node: ";
+    cin >> start;
+
+    // BFS
+    vector<int> bfsRes = g.bfs(start);
+    cout << "\nBFS Traversal: ";
     for (int x : bfsRes) cout << x << " ";
-    cout << endl;
+    cout << "\n";
 
-    vector<int> dfsRes = g.dfs(0);
-    cout << "DFS: ";
+    // DFS
+    vector<int> dfsRes = g.dfs(start);
+    cout << "DFS Traversal: ";
     for (int x : dfsRes) cout << x << " ";
-    cout << endl;
+    cout << "\n";
+
+    // Dijkstra
+    vector<int> dist = g.dijkstra(start);
+    cout << "Shortest distances from node " << start << ":\n";
+    for (int i = 0; i < V; i++) {
+        cout << "Node " << i << " -> ";
+        if (dist[i] == INT_MAX) cout << "INF";
+        else cout << dist[i];
+        cout << "\n";
+    }
 
     return 0;
 }
