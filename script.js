@@ -35,7 +35,28 @@ function buildGraph() {
   });
 
   let container = document.getElementById("network");
-  network = new vis.Network(container, { nodes, edges }, {});
+  let options = {
+  layout: {
+    improvedLayout: true
+  },
+  physics: {
+    enabled: true,
+    stabilization: {
+      iterations: 200
+    }
+  },
+  nodes: {
+    shape: "dot",
+    size: 20,
+    font: { color: "white" }
+  },
+  edges: {
+    color: "#94a3b8",
+    smooth: true
+  }
+};
+
+network = new vis.Network(container, { nodes, edges }, options);
 }
 
 function sleep(ms) {
